@@ -1,803 +1,144 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Точный тест вращения стилуса</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>3D Pencil with Tilt Control</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a237e, #4a148c, #880e4f);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            color: white;
-            padding: 20px;
-            overflow-x: hidden;
-        }
-        
-        .container {
-            max-width: 1000px;
-            width: 100%;
-            text-align: center;
-        }
-        
-        header {
-            margin-bottom: 30px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-        
-        h1 {
-            font-size: 2.8rem;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.4);
-            color: #ffcc80;
-        }
-        
-        .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            max-width: 700px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
-        
-        .test-area {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 30px;
-            margin: 30px 0;
-        }
-        
-        .canvas-container {
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(12px);
-            width: 100%;
-            max-width: 500px;
-            position: relative;
+            margin: 0;
             overflow: hidden;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
         }
-        
-        .canvas-container::before {
-            content: '';
+        canvas {
+            display: block;
+        }
+        #info {
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
-            pointer-events: none;
-        }
-        
-        #testCanvas {
-            width: 100%;
-            height: 350px;
-            background: rgba(0, 0, 0, 0.25);
-            border-radius: 15px;
-            touch-action: none;
-            cursor: crosshair;
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-        
-        .results {
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 30px 25px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(12px);
-            width: 100%;
-            max-width: 400px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        
-        .results h2 {
-            margin-bottom: 25px;
-            color: #81d4fa;
-        }
-        
-        .rotation-display {
-            position: relative;
-            width: 250px;
-            height: 250px;
-            margin: 0 auto 30px;
-        }
-        
-        .rotation-base {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: rgba(0, 0, 0, 0.3);
-            border: 4px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-        }
-        
-        .rotation-markers {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-        
-        .rotation-marker {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 4px;
-            height: 20px;
-            background: rgba(255, 255, 255, 0.6);
-            transform-origin: bottom center;
-        }
-        
-        .rotation-handle {
-            position: absolute;
-            top: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 28px;
-            height: 28px;
-            background: linear-gradient(135deg, #ff5252, #ff4081);
-            border-radius: 50%;
-            box-shadow: 0 0 20px rgba(255, 82, 82, 0.7);
-            transform-origin: center 110px;
-            transition: transform 0.15s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-            z-index: 10;
-        }
-        
-        .rotation-value {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 3rem;
-            font-weight: bold;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.4);
-            color: #ffcc80;
-        }
-        
-        .rotation-value::after {
-            content: "°";
-            font-size: 2rem;
-            color: #81d4fa;
-        }
-        
-        .data-panel {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            padding: 20px;
-            margin-top: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .data-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            font-size: 1.1rem;
-        }
-        
-        .data-row:last-child {
-            border-bottom: none;
-        }
-        
-        .data-label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .data-value {
-            font-weight: bold;
-            min-width: 80px;
-            text-align: right;
-        }
-        
-        .status {
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 15px;
-            padding: 25px;
-            margin: 30px 0;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .status h2 {
-            margin-bottom: 15px;
-            color: #81d4fa;
-        }
-        
-        #statusMessage {
-            font-size: 1.2rem;
-            line-height: 1.6;
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .instructions {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            padding: 30px;
-            text-align: left;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-        
-        .instructions h2 {
-            margin-bottom: 20px;
-            text-align: center;
-            color: #81d4fa;
-        }
-        
-        .instructions-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-        
-        .instruction-card {
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-        
-        .instruction-icon {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            color: #ffcc80;
-        }
-        
-        .instruction-card h3 {
-            margin-bottom: 12px;
-            color: #ffcc80;
-        }
-        
-        .support-table {
-            width: 100%;
-            margin-top: 25px;
-            border-collapse: collapse;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        
-        .support-table th, .support-table td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .support-table th {
-            background: rgba(0, 0, 0, 0.3);
-            color: #81d4fa;
-        }
-        
-        .support-table tr:last-child td {
-            border-bottom: none;
-        }
-        
-        .support-status {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-weight: bold;
-        }
-        
-        .supported {
-            background: rgba(76, 175, 80, 0.2);
-            color: #a5d6a7;
-        }
-        
-        .not-supported {
-            background: rgba(244, 67, 54, 0.2);
-            color: #ef9a9a;
-        }
-        
-        .partial {
-            background: rgba(255, 152, 0, 0.2);
-            color: #ffcc80;
-        }
-        
-        .tip {
-            margin-top: 25px;
-            padding: 20px;
-            background: rgba(255, 152, 0, 0.15);
-            border-left: 4px solid #ff9800;
-            border-radius: 8px;
-            display: flex;
-            gap: 15px;
-        }
-        
-        .tip i {
-            font-size: 1.8rem;
-            color: #ffcc80;
-        }
-        
-        .tip-content h3 {
-            margin-bottom: 8px;
-            color: #ffcc80;
-        }
-        
-        @media (max-width: 900px) {
-            .test-area {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .results, .canvas-container {
-                max-width: 100%;
-            }
-            
-            .rotation-display {
-                width: 220px;
-                height: 220px;
-            }
-            
-            .rotation-handle {
-                transform-origin: center 95px;
-            }
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 10px;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1><i class="fas fa-pen-fancy"></i> Точный тест вращения стилуса</h1>
-            <p class="subtitle">Проверка поддержки свойства вращения (twist) в PointerEvents API с визуализацией 3D-ориентации</p>
-        </header>
-        
-        <div class="test-area">
-            <div class="canvas-container">
-                <h2><i class="fas fa-draw-polygon"></i> Область тестирования</h2>
-                <canvas id="testCanvas"></canvas>
-            </div>
-            
-            <div class="results">
-                <h2><i class="fas fa-chart-line"></i> Результаты вращения</h2>
-                <div class="rotation-display">
-                    <div class="rotation-base"></div>
-                    <div class="rotation-markers" id="rotationMarkers"></div>
-                    <div class="rotation-handle" id="rotationHandle"></div>
-                    <div class="rotation-value" id="rotationValue">0</div>
-                </div>
-                
-                <div class="data-panel">
-                    <div class="data-row">
-                        <div class="data-label">
-                            <i class="fas fa-sync-alt"></i>
-                            <span>Угол вращения:</span>
-                        </div>
-                        <div class="data-value" id="angleValue">0°</div>
-                    </div>
-                    <div class="data-row">
-                        <div class="data-label">
-                            <i class="fas fa-weight-hanging"></i>
-                            <span>Давление:</span>
-                        </div>
-                        <div class="data-value" id="pressureValue">0.00</div>
-                    </div>
-                    <div class="data-row">
-                        <div class="data-label">
-                            <i class="fas fa-arrows-alt-h"></i>
-                            <span>Наклон по X:</span>
-                        </div>
-                        <div class="data-value" id="tiltXValue">0°</div>
-                    </div>
-                    <div class="data-row">
-                        <div class="data-label">
-                            <i class="fas fa-arrows-alt-v"></i>
-                            <span>Наклон по Y:</span>
-                        </div>
-                        <div class="data-value" id="tiltYValue">0°</div>
-                    </div>
-                    <div class="data-row">
-                        <div class="data-label">
-                            <i class="fas fa-mouse-pointer"></i>
-                            <span>Тип указателя:</span>
-                        </div>
-                        <div class="data-value" id="pointerType">-</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="status">
-            <h2><i class="fas fa-info-circle"></i> Статус тестирования</h2>
-            <div id="statusMessage">
-                <p>Ожидание данных стилуса. Нажмите стилусом в область тестирования...</p>
-            </div>
-        </div>
-        
-        <div class="instructions">
-            <h2><i class="fas fa-book"></i> Инструкция по использованию</h2>
-            <div class="instructions-grid">
-                <div class="instruction-card">
-                    <div class="instruction-icon">
-                        <i class="fas fa-tablet-alt"></i>
-                    </div>
-                    <h3>Поддерживаемые устройства</h3>
-                    <p>Тест работает с устройствами, поддерживающими стандарт PointerEvents Level 2: Microsoft Surface Pen, Samsung S Pen, Wacom, Apple Pencil (с ограничениями)</p>
-                </div>
-                <div class="instruction-card">
-                    <div class="instruction-icon">
-                        <i class="fas fa-hand-pointer"></i>
-                    </div>
-                    <h3>Как тестировать</h3>
-                    <p>1. Нажмите стилусом в область тестирования<br>
-                    2. Вращайте стилус вокруг своей оси<br>
-                    3. Следите за показателями угла вращения</p>
-                </div>
-                <div class="instruction-card">
-                    <div class="instruction-icon">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <h3>Важная информация</h3>
-                    <p>Вращение (twist) поддерживается не всеми устройствами. Если угол не меняется при вращении, значит ваш стилус или браузер не поддерживают эту функцию.</p>
-                </div>
-            </div>
-            
-            <table class="support-table">
-                <thead>
-                    <tr>
-                        <th>Браузер</th>
-                        <th>Стилус</th>
-                        <th>Поддержка вращения</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Chrome</td>
-                        <td>Surface Pen, S Pen</td>
-                        <td><span class="support-status supported">Полная</span></td>
-                    </tr>
-                    <tr>
-                        <td>Edge</td>
-                        <td>Surface Pen</td>
-                        <td><span class="support-status supported">Полная</span></td>
-                    </tr>
-                    <tr>
-                        <td>Safari</td>
-                        <td>Apple Pencil</td>
-                        <td><span class="support-status partial">Частичная</span></td>
-                    </tr>
-                    <tr>
-                        <td>Firefox</td>
-                        <td>Wacom, S Pen</td>
-                        <td><span class="support-status partial">Частичная</span></td>
-                    </tr>
-                </tbody>
-            </table>
-            
-            <div class="tip">
-                <i class="fas fa-lightbulb"></i>
-                <div class="tip-content">
-                    <h3>Почему вращение может не работать?</h3>
-                    <p>Свойство вращения (twist) реализовано не во всех стилусах. Даже если стилус поддерживает вращение, браузер может не предоставлять эти данные. Для лучших результатов используйте Chrome/Edge с Surface Pen или S Pen.</p>
-                </div>
-            </div>
-        </div>
+    <div id="info">
+        Наклоните устройство или используйте мышь (если поддерживается)<br>
+        TiltX: <span id="tiltX">0</span>°<br>
+        TiltY: <span id="tiltY">0</span>°
     </div>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        const canvas = document.getElementById('testCanvas');
-        const ctx = canvas.getContext('2d');
-        const rotationHandle = document.getElementById('rotationHandle');
-        const rotationValue = document.getElementById('rotationValue');
-        const angleValue = document.getElementById('angleValue');
-        const pressureValue = document.getElementById('pressureValue');
-        const tiltXValue = document.getElementById('tiltXValue');
-        const tiltYValue = document.getElementById('tiltYValue');
-        const pointerType = document.getElementById('pointerType');
-        const statusMessage = document.getElementById('statusMessage');
-        const rotationMarkers = document.getElementById('rotationMarkers');
+        // Инициализация сцены, камеры и рендерера
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Освещение
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
         
-        // Создание маркеров для шкалы вращения
-        function createRotationMarkers() {
-            rotationMarkers.innerHTML = '';
-            for (let i = 0; i < 36; i++) {
-                const marker = document.createElement('div');
-                marker.className = 'rotation-marker';
-                marker.style.transform = `translateX(-50%) rotate(${i * 10}deg)`;
-                rotationMarkers.appendChild(marker);
-            }
-        }
-        
-        // Установка размеров canvas
-        function resizeCanvas() {
-            const displayWidth = canvas.clientWidth;
-            const displayHeight = canvas.clientHeight;
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(1, 1, 1);
+        scene.add(directionalLight);
+
+        // Создание 3D карандаша
+        const pencilGroup = new THREE.Group();
+        scene.add(pencilGroup);
+
+        // Деревянная часть карандаша
+        const woodGeometry = new THREE.CylinderGeometry(0.1, 0.1, 2, 6);
+        const woodMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0xDEB887,
+            shininess: 30
+        });
+        const woodPart = new THREE.Mesh(woodGeometry, woodMaterial);
+        woodPart.position.y = 1;
+        pencilGroup.add(woodPart);
+
+        // Графитовая часть карандаша
+        const graphiteGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.2, 8);
+        const graphiteMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0x333333,
+            shininess: 100
+        });
+        const graphitePart = new THREE.Mesh(graphiteGeometry, graphiteMaterial);
+        graphitePart.position.y = 0.1;
+        pencilGroup.add(graphitePart);
+
+        // Металлическая часть карандаша
+        const metalGeometry = new THREE.CylinderGeometry(0.1, 0.1, 0.2, 6);
+        const metalMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0xC0C0C0,
+            shininess: 100,
+            specular: 0xFFFFFF
+        });
+        const metalPart = new THREE.Mesh(metalGeometry, metalMaterial);
+        metalPart.position.y = 0;
+        pencilGroup.add(metalPart);
+
+        // Ластик
+        const eraserGeometry = new THREE.CylinderGeometry(0.1, 0.1, 0.3, 6);
+        const eraserMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0xFF69B4,
+            shininess: 10
+        });
+        const eraserPart = new THREE.Mesh(eraserGeometry, eraserMaterial);
+        eraserPart.position.y = -0.15;
+        pencilGroup.add(eraserPart);
+
+        // Позиция камеры
+        camera.position.z = 3;
+
+        // Обработка событий наклона
+        let targetRotationX = 0;
+        let targetRotationZ = 0;
+        const rotationSpeed = 0.05;
+
+        function handleTilt(event) {
+            // Обновляем значения tiltX и tiltY в интерфейсе
+            document.getElementById('tiltX').textContent = event.tiltX !== undefined ? event.tiltX.toFixed(1) : 'N/A';
+            document.getElementById('tiltY').textContent = event.tiltY !== undefined ? event.tiltY.toFixed(1) : 'N/A';
             
-            if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
-                canvas.width = displayWidth;
-                canvas.height = displayHeight;
-                drawCanvas();
-            }
-        }
-        
-        // Отрисовка фона canvas
-        function drawCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Рисуем градиентный фон
-            const gradient = ctx.createRadialGradient(
-                canvas.width/2, canvas.height/2, 0,
-                canvas.width/2, canvas.height/2, Math.max(canvas.width, canvas.height)/2
-            );
-            gradient.addColorStop(0, 'rgba(179, 229, 252, 0.1)');
-            gradient.addColorStop(1, 'rgba(144, 202, 249, 0.03)');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Рисуем сетку
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-            ctx.lineWidth = 1;
-            
-            const gridSize = 40;
-            for (let x = 0; x <= canvas.width; x += gridSize) {
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, canvas.height);
-                ctx.stroke();
-            }
-            
-            for (let y = 0; y <= canvas.height; y += gridSize) {
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(canvas.width, y);
-                ctx.stroke();
-            }
-            
-            // Центральная мишень
-            ctx.beginPath();
-            ctx.arc(canvas.width/2, canvas.height/2, 70, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.arc(canvas.width/2, canvas.height/2, 40, 0, Math.PI * 2);
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.arc(canvas.width/2, canvas.height/2, 10, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.fill();
-            
-            // Текст инструкции
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-            ctx.font = 'bold 18px "Segoe UI", sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('ВРАЩАЙТЕ СТИЛУС ВОКРУГ СВОЕЙ ОСИ', canvas.width/2, canvas.height/2);
-            ctx.font = '16px "Segoe UI", sans-serif';
-            ctx.fillText('для проверки поддержки вращения (twist)', canvas.width/2, canvas.height/2 + 30);
-        }
-        
-        // Обновление индикатора вращения
-        function updateRotation(angle) {
-            const roundedAngle = Math.round(angle);
-            rotationValue.textContent = roundedAngle;
-            angleValue.textContent = roundedAngle + '°';
-            rotationHandle.style.transform = `translateX(-50%) rotate(${roundedAngle}deg)`;
-        }
-        
-        // Обработчик событий стилуса
-        function handlePointerEvent(e) {
-            // Обновляем статус
-            statusMessage.innerHTML = `<p>Стилус активен. Вращайте стилус для тестирования.</p>`;
-            pointerType.textContent = e.pointerType;
-            
-            // Проверяем поддержку свойства twist
-            const twistSupported = typeof e.twist !== 'undefined';
-            
-            // Получаем данные со стилуса
-            const twist = twistSupported ? e.twist : 0;
-            const pressure = typeof e.pressure === 'undefined' ? 0 : e.pressure;
-            const tiltX = typeof e.tiltX === 'undefined' ? 0 : e.tiltX;
-            const tiltY = typeof e.tiltY === 'undefined' ? 0 : e.tiltY;
-            
-            // Обновляем данные
-            updateRotation(twist);
-            pressureValue.textContent = pressure.toFixed(2);
-            tiltXValue.textContent = Math.round(tiltX) + '°';
-            tiltYValue.textContent = Math.round(tiltY) + '°';
-            
-            // Отрисовка на canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawCanvas();
-            
-            // Рисуем точку контакта
-            ctx.beginPath();
-            ctx.arc(e.offsetX, e.offsetY, 15 + pressure * 25, 0, Math.PI * 2);
-            ctx.fillStyle = twistSupported ? 
-                `rgba(76, 175, 80, ${0.4 + pressure*0.5})` : 
-                `rgba(244, 67, 54, ${0.4 + pressure*0.5})`;
-            ctx.fill();
-            
-            // Рисуем индикатор вращения, если поддерживается
-            if (twistSupported) {
-                const angleRad = twist * Math.PI / 180;
-                const indicatorLength = 50 + pressure * 40;
-                
-                // Линия направления
-                ctx.beginPath();
-                ctx.moveTo(e.offsetX, e.offsetY);
-                ctx.lineTo(
-                    e.offsetX + Math.sin(angleRad) * indicatorLength,
-                    e.offsetY - Math.cos(angleRad) * indicatorLength
-                );
-                ctx.strokeStyle = '#81c784';
-                ctx.lineWidth = 4;
-                ctx.lineCap = 'round';
-                ctx.stroke();
-                
-                // Круг на конце указателя
-                ctx.beginPath();
-                ctx.arc(
-                    e.offsetX + Math.sin(angleRad) * indicatorLength,
-                    e.offsetY - Math.cos(angleRad) * indicatorLength,
-                    8, 0, Math.PI * 2
-                );
-                ctx.fillStyle = '#4caf50';
-                ctx.fill();
-                
-                // Текст с углом
-                ctx.fillStyle = '#e8f5e9';
-                ctx.font = 'bold 16px "Segoe UI", sans-serif';
-                ctx.fillText(`${Math.round(twist)}°`, 
-                    e.offsetX + Math.sin(angleRad) * (indicatorLength + 25),
-                    e.offsetY - Math.cos(angleRad) * (indicatorLength + 25));
+            // Если tiltX и tiltY доступны, используем их
+            if (event.tiltX !== undefined && event.tiltY !== undefined) {
+                // Преобразуем градусы в радианы и инвертируем для более естественного движения
+                targetRotationZ = -event.tiltX * (Math.PI / 180);
+                targetRotationX = event.tiltY * (Math.PI / 180);
             } else {
-                // Сообщение о неподдержке вращения
-                ctx.fillStyle = 'rgba(255, 138, 128, 0.9)';
-                ctx.font = 'bold 18px "Segoe UI", sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('ВРАЩЕНИЕ НЕ ПОДДЕРЖИВАЕТСЯ', e.offsetX, e.offsetY - 50);
-                ctx.font = '16px "Segoe UI", sans-serif';
-                ctx.fillText('Ваше устройство не передает данные о вращении', e.offsetX, e.offsetY - 25);
+                // Альтернативное управление мышью (если tilt не поддерживается)
+                targetRotationX = (event.clientY / window.innerHeight - 0.5) * Math.PI;
+                targetRotationZ = -(event.clientX / window.innerWidth - 0.5) * Math.PI;
             }
         }
+
+        // Добавляем обработчики событий
+        document.addEventListener('pointermove', handleTilt);
         
-        // Проверка поддержки PointerEvents и свойств стилуса
-        function checkPointerSupport() {
-            if (window.PointerEvent) {
-                let supportText = '<p>PointerEvents поддерживается. ';
-                
-                // Проверка поддержки конкретных свойств
-                const twistSupported = 'twist' in PointerEvent.prototype;
-                const pressureSupported = 'pressure' in PointerEvent.prototype;
-                const tiltSupported = 'tiltX' in PointerEvent.prototype;
-                
-                supportText += `Поддержка вращения (twist): <span class="${twistSupported ? 'supported' : 'not-supported'}">${twistSupported ? 'Да' : 'Нет'}</span></p>`;
-                supportText += `<p>Поддержка давления: <span class="${pressureSupported ? 'supported' : 'not-supported'}">${pressureSupported ? 'Да' : 'Нет'}</span> | `;
-                supportText += `Поддержка наклона: <span class="${tiltSupported ? 'supported' : 'not-supported'}">${tiltSupported ? 'Да' : 'Нет'}</span></p>`;
-                
-                statusMessage.innerHTML = supportText;
-                
-                // Добавляем обработчики событий
-                canvas.addEventListener('pointermove', (e) => {
-                    if (e.pointerType === 'pen') {
-                        handleInteractionStart();
-                        handlePointerEvent(e);
-                    }
-                });
-                
-                canvas.addEventListener('pointerdown', (e) => {
-                    if (e.pointerType === 'pen') {
-                        handleInteractionStart();
-                        handlePointerEvent(e);
-                        pointerType.textContent = e.pointerType;
-                    }
-                });
-            } else {
-                statusMessage.innerHTML = '<p style="color:#ef9a9a">Ваш браузер не поддерживает PointerEvents. Тест невозможен.</p>';
-            }
-        }
-        
-        // Логика демонстрации
-        let demoInterval;
-        let isInteracting = false;
-        let inactivityTimer;
-
-        // Функция для запуска демонстрации
-        function startDemo() {
-            if (isInteracting) return;
-            
-            let demoAngle = 0;
-            const demoElements = [rotationHandle, rotationValue, angleValue];
-            const originalValues = demoElements.map(el => el.style.transform || el.textContent);
-            
-            demoInterval = setInterval(() => {
-                demoAngle = (demoAngle + 2) % 360;
-                rotationHandle.style.transform = `translateX(-50%) rotate(${demoAngle}deg)`;
-                rotationValue.textContent = demoAngle;
-                angleValue.textContent = demoAngle + '°';
-            }, 50);
-            
-            // Возвращаем функцию для остановки демонстрации
-            return () => {
-                clearInterval(demoInterval);
-                demoElements.forEach((el, i) => {
-                    if (el === rotationHandle) {
-                        el.style.transform = originalValues[i];
-                    } else {
-                        el.textContent = originalValues[i];
-                    }
-                });
-            };
-        }
-
-        // Останавливаем демонстрацию при взаимодействии
-        function handleInteractionStart() {
-            if (!isInteracting) {
-                isInteracting = true;
-                clearInterval(demoInterval);
-                
-                // Запускаем таймер для возобновления демонстрации после бездействия
-                resetInactivityTimer();
-            }
-        }
-
-        // Возобновляем демонстрацию через 5 секунд бездействия
-        function resetInactivityTimer() {
-            clearTimeout(inactivityTimer);
-            inactivityTimer = setTimeout(() => {
-                isInteracting = false;
-                startDemo();
-            }, 5000);
-        }
-
-        // Обработчик события pointerleave
-        canvas.addEventListener('pointerleave', resetInactivityTimer);
-
-        // Обработчик изменения видимости страницы
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'hidden') {
-                clearInterval(demoInterval);
-            } else if (!isInteracting) {
-                startDemo();
-            }
+        // Обработка изменения размера окна
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // Инициализация
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-        createRotationMarkers();
-        checkPointerSupport();
-        
-        // Запускаем демонстрацию при загрузке
-        startDemo();
+        // Анимация
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Плавное изменение вращения
+            pencilGroup.rotation.x += (targetRotationX - pencilGroup.rotation.x) * rotationSpeed;
+            pencilGroup.rotation.z += (targetRotationZ - pencilGroup.rotation.z) * rotationSpeed;
+            
+            renderer.render(scene, camera);
+        }
+
+        animate();
     </script>
 </body>
 </html>
