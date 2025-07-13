@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Pencil - Top View</title>
+    <title>Red Pencil with White Eraser</title>
     <style>
         body {
             margin: 0;
@@ -39,17 +39,17 @@
         const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ 
             antialias: true,
-            alpha: false // Отключаем прозрачность рендерера
+            alpha: false
         });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Освещение (более яркое для вида сверху)
+        // Освещение
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
         scene.add(ambientLight);
         
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(0, 1, 0); // Свет сверху
+        directionalLight.position.set(0, 1, 0);
         scene.add(directionalLight);
 
         // Создание 3D карандаша
@@ -59,42 +59,20 @@
         // Параметры карандаша
         const length = 3;
         const radius = 0.15;
-        const tipLength = 0.5;
 
-        // Деревянная часть с заострением
-        const woodGeometry = new THREE.CylinderGeometry(
-            radius * 0.1, // Верхний радиус (острый конец)
-            radius,       // Нижний радиус
-            tipLength,    // Длина заостренной части
-            6            // Количество сторон
-        );
-        woodGeometry.translate(0, -length/2 + tipLength/2, 0);
-        
-        const woodMaterial = new THREE.MeshPhongMaterial({ 
-            color: 0xDEB887, // Деревянный цвет
-            transparent: false, // Явно отключаем прозрачность
-            opacity: 1.0,    // Полная непрозрачность
+        // Основная часть карандаша (красная)
+        const pencilGeometry = new THREE.CylinderGeometry(radius, radius, length, 6);
+        const pencilMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0xFF0000, // Красный цвет
+            transparent: false,
             shininess: 30
         });
-        const woodPart = new THREE.Mesh(woodGeometry, woodMaterial);
-        pencilGroup.add(woodPart);
+        const pencilPart = new THREE.Mesh(pencilGeometry, pencilMaterial);
+        pencilGroup.add(pencilPart);
 
-        // Основная деревянная часть
-        const mainWoodGeometry = new THREE.CylinderGeometry(
-            radius, radius, length - tipLength, 6
-        );
-        mainWoodGeometry.translate(0, tipLength/2, 0);
-        
-        const mainWoodPart = new THREE.Mesh(mainWoodGeometry, woodMaterial);
-        pencilGroup.add(mainWoodPart);
-
-        // Графитовый стержень (конус)
-        const graphiteGeometry = new THREE.ConeGeometry(
-            0.02,       // Радиус основания
-            0.2,        // Высота
-            8           // Количество сторон
-        );
-        graphiteGeometry.translate(0, -length/2, 0);
+        // Графитовый стержень (цилиндр, не заостренный)
+        const graphiteGeometry = new THREE.CylinderGeometry(0.02, 0.02, 0.2, 8);
+        graphiteGeometry.translate(0, -length/2 + 0.1, 0);
         const graphiteMaterial = new THREE.MeshPhongMaterial({ 
             color: 0x222222,
             transparent: false,
@@ -104,10 +82,8 @@
         pencilGroup.add(graphitePart);
 
         // Металлическая обжимка
-        const metalGeometry = new THREE.CylinderGeometry(
-            radius, radius, 0.2, 6
-        );
-        metalGeometry.translate(0, length/2 - 0.5, 0);
+        const metalGeometry = new THREE.CylinderGeometry(radius, radius, 0.2, 6);
+        metalGeometry.translate(0, length/2 - 0.1, 0);
         const metalMaterial = new THREE.MeshPhongMaterial({ 
             color: 0xC0C0C0,
             transparent: false,
@@ -117,13 +93,11 @@
         const metalPart = new THREE.Mesh(metalGeometry, metalMaterial);
         pencilGroup.add(metalPart);
 
-        // Ластик
-        const eraserGeometry = new THREE.CylinderGeometry(
-            radius, radius, 0.4, 6
-        );
+        // Ластик (белый)
+        const eraserGeometry = new THREE.CylinderGeometry(radius, radius, 0.4, 6);
         eraserGeometry.translate(0, length/2 - 0.2, 0);
         const eraserMaterial = new THREE.MeshPhongMaterial({ 
-            color: 0xFF69B4,
+            color: 0xFFFFFF, // Белый цвет
             transparent: false,
             shininess: 10
         });
@@ -144,14 +118,9 @@
         // Настройка камеры (вид сверху)
         camera.position.set(0, 2, 0);
         camera.lookAt(0, 0, 0);
-        camera.up.set(0, 0, -1); // Ось Z направлена вниз для правильного вида сверху
+        camera.up.set(0, 0, -1);
 
-        // Обработка наклонов
-        let targetRotationX = 0;
-        let targetRotationZ = 0;
-        const rotationSpeed = 0.1;
-        const maxTilt = 25; // Максимальный угол наклона
-
+        // Обработка наклонов (без анимации)
         function handleTilt(event) {
             let tiltX = 0, tiltY = 0;
             
@@ -160,20 +129,16 @@
                 tiltY = event.tiltY;
             } else {
                 // Альтернативное управление мышью
-                tiltX = (event.clientX / window.innerWidth - 0.5) * 2 * maxTilt;
-                tiltY = -(event.clientY / window.innerHeight - 0.5) * 2 * maxTilt;
+                tiltX = (event.clientX / window.innerWidth - 0.5) * 60;
+                tiltY = -(event.clientY / window.innerHeight - 0.5) * 60;
             }
             
             document.getElementById('tiltX').textContent = tiltX.toFixed(1);
             document.getElementById('tiltY').textContent = tiltY.toFixed(1);
             
-            // Ограничиваем угол наклона
-            tiltX = Math.max(-maxTilt, Math.min(maxTilt, tiltX));
-            tiltY = Math.max(-maxTilt, Math.min(maxTilt, tiltY));
-            
-            // Преобразуем в радианы
-            targetRotationZ = -tiltX * (Math.PI / 180);
-            targetRotationX = tiltY * (Math.PI / 180);
+            // Немедленное вращение без анимации
+            pencilGroup.rotation.z = -tiltX * (Math.PI / 180);
+            pencilGroup.rotation.x = tiltY * (Math.PI / 180);
         }
 
         document.addEventListener('pointermove', handleTilt);
@@ -185,18 +150,12 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // Анимация
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            // Плавное вращение
-            pencilGroup.rotation.x += (targetRotationX - pencilGroup.rotation.x) * rotationSpeed;
-            pencilGroup.rotation.z += (targetRotationZ - pencilGroup.rotation.z) * rotationSpeed;
-            
+        // Рендер без анимации
+        function render() {
             renderer.render(scene, camera);
+            requestAnimationFrame(render);
         }
-
-        animate();
+        render();
     </script>
 </body>
 </html>
