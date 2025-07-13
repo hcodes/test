@@ -6,7 +6,7 @@
     <title>Точный тест вращения стилуса</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {  
+        * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -413,7 +413,7 @@
                             <span>Наклон по X:</span>
                         </div>
                         <div class="data-value" id="tiltXValue">0°</div>
-                    </div>l
+                    </div>
                     <div class="data-row">
                         <div class="data-label">
                             <i class="fas fa-arrows-alt-v"></i>
@@ -705,36 +705,99 @@
                 
                 statusMessage.innerHTML = supportText;
                 
-                canvas.addEventListener('pointermove', handlePointerEvent);
-                canvas.addEventListener('pointerdown', handlePointerEvent);
+                // Добавляем обработчики событий
+                canvas.addEventListener('pointermove', (e) => {
+                    if (e.pointerType === 'pen') {
+                        handleInteractionStart();
+                        handlePointerEvent(e);
+                    }
+                });
                 
-                // Добавляем обработчик для определения типа указателя
                 canvas.addEventListener('pointerdown', (e) => {
-                    pointerType.textContent = e.pointerType;
+                    if (e.pointerType === 'pen') {
+                        handleInteractionStart();
+                        handlePointerEvent(e);
+                        pointerType.textContent = e.pointerType;
+                    }
                 });
             } else {
                 statusMessage.innerHTML = '<p style="color:#ef9a9a">Ваш браузер не поддерживает PointerEvents. Тест невозможен.</p>';
             }
         }
         
+        // Логика демонстрации
+        let demoInterval;
+        let isInteracting = false;
+        let inactivityTimer;
+
+        // Функция для запуска демонстрации
+        function startDemo() {
+            if (isInteracting) return;
+            
+            let demoAngle = 0;
+            const demoElements = [rotationHandle, rotationValue, angleValue];
+            const originalValues = demoElements.map(el => el.style.transform || el.textContent);
+            
+            demoInterval = setInterval(() => {
+                demoAngle = (demoAngle + 2) % 360;
+                rotationHandle.style.transform = `translateX(-50%) rotate(${demoAngle}deg)`;
+                rotationValue.textContent = demoAngle;
+                angleValue.textContent = demoAngle + '°';
+            }, 50);
+            
+            // Возвращаем функцию для остановки демонстрации
+            return () => {
+                clearInterval(demoInterval);
+                demoElements.forEach((el, i) => {
+                    if (el === rotationHandle) {
+                        el.style.transform = originalValues[i];
+                    } else {
+                        el.textContent = originalValues[i];
+                    }
+                });
+            };
+        }
+
+        // Останавливаем демонстрацию при взаимодействии
+        function handleInteractionStart() {
+            if (!isInteracting) {
+                isInteracting = true;
+                clearInterval(demoInterval);
+                
+                // Запускаем таймер для возобновления демонстрации после бездействия
+                resetInactivityTimer();
+            }
+        }
+
+        // Возобновляем демонстрацию через 5 секунд бездействия
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                isInteracting = false;
+                startDemo();
+            }, 5000);
+        }
+
+        // Обработчик события pointerleave
+        canvas.addEventListener('pointerleave', resetInactivityTimer);
+
+        // Обработчик изменения видимости страницы
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                clearInterval(demoInterval);
+            } else if (!isInteracting) {
+                startDemo();
+            }
+        });
+
         // Инициализация
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
         createRotationMarkers();
         checkPointerSupport();
         
-        // Добавляем анимацию для демонстрации
-        let demoAngle = 0;
-        function demoAnimation() {
-            if (rotationValue.textContent === '0') {
-                demoAngle = (demoAngle + 1) % 360;
-                rotationHandle.style.transform = `translateX(-50%) rotate(${demoAngle}deg)`;
-                rotationValue.textContent = demoAngle;
-                angleValue.textContent = demoAngle + '°';
-            }
-            requestAnimationFrame(demoAnimation);
-        }
-        demoAnimation();
+        // Запускаем демонстрацию при загрузке
+        startDemo();
     </script>
 </body>
 </html>
