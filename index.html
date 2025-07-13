@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест вращения стилуса</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        header {
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .test-area {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin: 30px 0;
+        }
+        
+        .canvas-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        #testCanvas {
+            width: 100%;
+            height: 300px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            touch-action: none;
+            cursor: crosshair;
+        }
+        
+        .results {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            width: 100%;
+            max-width: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .rotation-display {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+        }
+        
+        .rotation-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .rotation-handle {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: #ff4136;
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(255, 65, 54, 0.7);
+            transform-origin: center 90px;
+            transition: transform 0.1s ease-out;
+        }
+        
+        .rotation-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        .rotation-value::after {
+            content: "°";
+            font-size: 1.5rem;
+        }
+        
+        .data-panel {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .data-row:last-child {
+            border-bottom: none;
+        }
+        
+        .status {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .instructions {
+            margin-top: 30px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+        }
+        
+        .instructions h2 {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        
+        .highlight {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
+        .tip {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 193, 7, 0.2);
+            border-left: 4px solid #ffc107;
+            border-radius: 4px;
+        }
+        
+        @media (max-width: 768px) {
+            .test-area {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .results, .canvas-container {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Тест вращения стилуса</h1>
+            <p class="subtitle">Проверка поддержки вращения стилуса с использованием PointerEvents</p>
+        </header>
+        
+        <div class="test-area">
+            <div class="canvas-container">
+                <h2>Область тестирования</h2>
+                <canvas id="testCanvas"></canvas>
+            </div>
+            
+            <div class="results">
+                <h2>Результаты вращения</h2>
+                <div class="rotation-display">
+                    <div class="rotation-indicator"></div>
+                    <div class="rotation-handle" id="rotationHandle"></div>
+                    <div class="rotation-value" id="rotationValue">0</div>
+                </div>
+                
+                <div class="data-panel">
+                    <div class="data-row">
+                        <span>Угол вращения:</span>
+                        <span id="angleValue">0°</span>
+                    </div>
+                    <div class="data-row">
+                        <span>Давление:</span>
+                        <span id="pressureValue">0.0</span>
+                    </div>
+                    <div class="data-row">
+                        <span>Наклон X:</span>
+                        <span id="tiltXValue">0°</span>
+                    </div>
+                    <div class="data-row">
+                        <span>Наклон Y:</span>
+                        <span id="tiltYValue">0°</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status" id="status">
+            <p>Ожидание данных стилуса. Нажмите стилусом в область тестирования...</p>
+        </div>
+        
+        <div class="instructions">
+            <h2>Как использовать тест</h2>
+            <ol>
+                <li>Используйте стилус с поддержкой вращения (например, Wacom, Surface Pen, S Pen)</li>
+                <li>Нажмите стилусом на область тестирования и вращайте стилус вокруг своей оси</li>
+                <li>Следите за показателями вращения в правой панели</li>
+                <li>Для точного теста, совершите полное вращение на 360°</li>
+            </ol>
+            <div class="tip">
+                <strong>Совет:</strong> Если вращение не определяется, убедитесь что ваш стилус и браузер поддерживают свойство <span class="highlight">twist</span> в PointerEvents.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('testCanvas');
+        const ctx = canvas.getContext('2d');
+        const rotationHandle = document.getElementById('rotationHandle');
+        const rotationValue = document.getElementById('rotationValue');
+        const angleValue = document.getElementById('angleValue');
+        const pressureValue = document.getElementById('pressureValue');
+        const tiltXValue = document.getElementById('tiltXValue');
+        const tiltYValue = document.getElementById('tiltYValue');
+        const status = document.getElementById('status');
+        
+        // Установка размеров canvas
+        function resizeCanvas() {
+            const displayWidth = canvas.clientWidth;
+            const displayHeight = canvas.clientHeight;
+            
+            if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+                canvas.width = displayWidth;
+                canvas.height = displayHeight;
+                drawCanvas();
+            }
+        }
+        
+        // Отрисовка фона canvas
+        function drawCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Рисуем сетку
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
+            
+            const gridSize = 30;
+            for (let x = 0; x <= canvas.width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            for (let y = 0; y <= canvas.height; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+            
+            // Центральная мишень
+            ctx.beginPath();
+            ctx.arc(canvas.width/2, canvas.height/2, 60, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.arc(canvas.width/2, canvas.height/2, 30, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // Текст инструкции
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.font = '16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Вращайте стилус в этой области', canvas.width/2, canvas.height/2);
+        }
+        
+        // Обновление индикатора вращения
+        function updateRotation(angle) {
+            rotationValue.textContent = Math.round(angle);
+            angleValue.textContent = Math.round(angle) + '°';
+            rotationHandle.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+        }
+        
+        // Обработчик событий стилуса
+        function handlePointerEvent(e) {
+            // Проверяем, что это событие от стилуса
+            if (e.pointerType === 'pen') {
+                // Обновляем статус
+                status.innerHTML = `<p>Стилус активен. Вращайте стилус для тестирования.</p>`;
+                
+                // Обновляем данные
+                const twist = typeof e.twist === 'undefined' ? 0 : e.twist;
+                const pressure = typeof e.pressure === 'undefined' ? 0 : e.pressure;
+                const tiltX = typeof e.tiltX === 'undefined' ? 0 : e.tiltX;
+                const tiltY = typeof e.tiltY === 'undefined' ? 0 : e.tiltY;
+                
+                updateRotation(twist);
+                pressureValue.textContent = pressure.toFixed(2);
+                tiltXValue.textContent = Math.round(tiltX) + '°';
+                tiltYValue.textContent = Math.round(tiltY) + '°';
+                
+                // Отрисовка на canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawCanvas();
+                
+                // Рисуем точку контакта
+                ctx.beginPath();
+                ctx.arc(e.offsetX, e.offsetY, 15 + pressure * 20, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 65, 54, ${0.5 + pressure*0.5})`;
+                ctx.fill();
+                
+                // Рисуем индикатор вращения
+                const angleRad = twist * Math.PI / 180;
+                const indicatorLength = 40 + pressure * 30;
+                
+                ctx.beginPath();
+                ctx.moveTo(e.offsetX, e.offsetY);
+                ctx.lineTo(
+                    e.offsetX + Math.sin(angleRad) * indicatorLength,
+                    e.offsetY - Math.cos(angleRad) * indicatorLength
+                );
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 3;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+                
+                // Рисуем круг на конце указателя
+                ctx.beginPath();
+                ctx.arc(
+                    e.offsetX + Math.sin(angleRad) * indicatorLength,
+                    e.offsetY - Math.cos(angleRad) * indicatorLength,
+                    6, 0, Math.PI * 2
+                );
+                ctx.fillStyle = '#ff4136';
+                ctx.fill();
+            }
+        }
+        
+        // Проверка поддержки PointerEvents и свойств стилуса
+        function checkPointerSupport() {
+            if (window.PointerEvent) {
+                status.innerHTML = '<p>PointerEvents поддерживается. Используйте стилус для тестирования вращения.</p>';
+                
+                canvas.addEventListener('pointermove', handlePointerEvent);
+                canvas.addEventListener('pointerdown', handlePointerEvent);
+            } else {
+                status.innerHTML = '<p style="color:#ff4136">Ваш браузер не поддерживает PointerEvents. Тест невозможен.</p>';
+            }
+        }
+        
+        // Инициализация
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        checkPointerSupport();
+        
+        // Добавляем анимацию для демонстрации
+        let demoAngle = 0;
+        function demoAnimation() {
+            if (rotationValue.textContent === '0') {
+                demoAngle = (demoAngle + 1) % 360;
+                rotationHandle.style.transform = `translateX(-50%) rotate(${demoAngle}deg)`;
+                rotationValue.textContent = demoAngle;
+            }
+            requestAnimationFrame(demoAnimation);
+        }
+        demoAnimation();
+    </script>
+</body>
+</html>
