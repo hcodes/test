@@ -4,18 +4,21 @@
     <meta charset="utf-8" />
 </head>
 <body>
+    <p><button id="start">Start</button></p>
     <script>
-        //var label = document.querySelector('#label');
-        setInterval(() => {
-            var input = document.createElement('input');
-            input.type = 'checkbox';
-            input.setAttribute('switch', '');
-            document.body.appendChild(input);
-            input.click();
-            setTimeout(() => {
-                document.body.removeChild(input);
-            }, 100);
-        }, 1000);
+        var button = document.querySelector('#start');
+        button.onclick = () => {
+            setInterval(() => {
+                var input = document.createElement('input');
+                input.type = 'checkbox';
+                input.setAttribute('switch', '');
+                document.body.appendChild(input);
+                input.click();
+                setTimeout(() => {
+                    document.body.removeChild(input);
+                }, 100);
+            }, 1000);
+        };
     </script>
 </body>
 </html>
