@@ -15,10 +15,11 @@
                 input.type = 'checkbox';
                 input.setAttribute('switch', '');
                 document.body.appendChild(input);
+                input.focus();
                 input.click();
                 setTimeout(() => {
                     document.body.removeChild(input);
-                }, 100);
+                }, 1000);
             }, 1000);
         };
     </script>
