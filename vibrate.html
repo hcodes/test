@@ -4,11 +4,15 @@
     <meta charset="utf-8" />
 </head>
 <body>
-    <p><label for="id"><input id="input" type="switch"/></label></p>
+    <p><label for="input" id="label">123</label> <input id="input" type="switch"/></label></p>
     <script>
-        var label = document.querySelector('#id');
+        var label = document.querySelector('#label');
+        var input = document.querySelector('#input');
         setInterval(() => {
             label.click();
+            setTimeout(() => {
+                input.blur();
+            }, 100);
         }, 1000);
     </script>
 </body>
