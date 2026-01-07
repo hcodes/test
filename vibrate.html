@@ -5,22 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-    <p>Input: <input type="checkbox" switch /></p>
+    <p>Input: <label id="label"><input type="checkbox" switch /></label></p>
     <p><button id="start">Start</button></p>
     <script>
         var button = document.querySelector('#start');
         button.onclick = () => {
             setInterval(() => {
-                var input = document.createElement('input');
-                input.type = 'checkbox';
-                input.setAttribute('switch', '');
-                document.body.appendChild(input);
-                input.focus();
-                input.click();
-                setTimeout(() => {
-                    document.body.removeChild(input);
-                }, 1000);
-            }, 1000);
+                var label = document.querySelector('#label');
+                label.click();
+            }, 100);
         };
     </script>
 </body>
