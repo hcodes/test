@@ -26,10 +26,15 @@
 
         var button = document.querySelector('#start');
 
-        button.onclick = () => {
-            setInterval(() => {
+        function update() {
+            setTimeout(() => {
                 haptic();
+                update();
             }, 120);
+        }
+
+        button.onclick = () => {
+            update();
         };
     </script>
 </body>
