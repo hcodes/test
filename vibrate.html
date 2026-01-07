@@ -4,14 +4,16 @@
     <meta charset="utf-8" />
 </head>
 <body>
-    <p><label for="input" id="label">222</label> <input id="input" type="checkbox" switch /></label></p>
     <script>
         //var label = document.querySelector('#label');
-        var input = document.querySelector('#input');
         setInterval(() => {
+            var input = document.createElement('input');
+            input.type = 'checkbox';
+            input.setAttribute('switch', '');
+            document.body.appendChild(input);
             input.click();
             setTimeout(() => {
-                input.blur();
+                document.body.removeChild(input);
             }, 100);
         }, 1000);
     </script>
