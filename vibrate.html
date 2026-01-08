@@ -7,7 +7,8 @@
 <body>
     <p>Input: <label id="label"><input type="checkbox" switch /></label></p>
     <p id="count"></p>
-    <p><button id="start">Start</button></p>
+    <p><button id="start">Start 50</button></p>
+    <p><button id="start2">Start 100</button></p>
     <script>
 
         let count = 0;
@@ -27,6 +28,7 @@
         }
 
         var button = document.querySelector('#start');
+        var button2 = document.querySelector('#start2');
 
         function update() {
             setTimeout(() => {
@@ -37,8 +39,21 @@
             }, 50);
         }
 
+        function update2() {
+            setTimeout(() => {
+                haptic();
+                count++;
+                document.querySelector('#count').innerText += 1;
+                update();
+            }, 100);
+        }
+
         button.onclick = () => {
             update();
+        };
+
+        button2.onclick = () => {
+            update2();
         };
     </script>
 </body>
