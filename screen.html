@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-    <p>window.orientation: <span id="orientation"></span></p>
+    <p>window.orientation: <span id="window-orientation"></span></p>
     <p>screen.orientation: <span id="screen-orientation"></span></p>
     <p>screen.webkitOrientation: <span id="screen-webkit-orientation"></span></p>
     <script>
         setInterval(function() {
-            document.getElementById('orientation').innerHTML = window.orientation;
+            document.getElementById('window-orientation').innerHTML = window.orientation;
             document.getElementById('screen-orientation').innerHTML = JSON.stringify(screen.orientation);
             document.getElementById('screen-webkit-orientation').innerHTML = JSON.stringify(screen.webkitOrientation);
         }, 1000);
