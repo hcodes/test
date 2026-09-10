@@ -6,7 +6,12 @@ All notable changes made in this fork after the upstream `1.0.5` release are doc
 
 ### Added
 
-- Added 16 kHz SBC parsing and rate-aware pacing/diagnostics, with a 61 kbit/s `both-16k-low.sbc` demo default. Original 32 kHz variants remain selectable.
+- Added a 4/2/1 Frames per packet selector for demo Test speaker and Play sample; automatic packet comparison still tests all three.
+- Restored four-frame demo playback and removed dense-packing controls after the user reported silence with more than four frames. Stutter with baseline framing remains unresolved.
+- Added experimental 8/16/24-frame packing into 0x17, limited to the existing audio region, with matching tail padding, dense playback timing and native diagnostics. The tested layout produced silence on hardware.
+- Added stronger experimental bitpool 4 (21 kbit/s, demo default) and bitpool 2 (17 kbit/s) samples; wire framing remains unchanged.
+- Added experimental 16 kHz bitpool 12 (37 kbit/s) and bitpool 8 (29 kbit/s) samples, with parser, padding and native diagnostic support. HID packet layout is unchanged.
+- Added 16 kHz SBC parsing and rate-aware pacing/diagnostics, with a selectable 61 kbit/s `both-16k-low.sbc` sample. Original 32 kHz variants remain selectable.
 - Added an experimental 122 kbit/s SBC sample (bitpool 24) with matching frame validation/silence padding; the original 218 kbit/s sample remains selectable. Both preserve report IDs by frame count after smaller packing produced no sound on hardware.
 - Added a short packet-size comparison in the demo and 1/2/4-frame playback options for measuring `0x12`/`0x14`/`0x17` throughput, with report-capability checks.
 - Added a Bluetooth input-interval playback option and demo comparison controls (default 8 in the demo), preserving it across audio/effect writes and restoring 0 on cleanup.
@@ -17,6 +22,7 @@ All notable changes made in this fork after the upstream `1.0.5` release are doc
 
 ### Fixed
 
+- Parse basic Bluetooth buttons/axes and descriptor-confirmed Windows input padding; retain CRC validation for extended reports. Added demo connection diagnostics for hardware verification on Windows.
 - Removed cumulative HID write delays from speaker playback and added an estimated 64 ms audio reserve with paced refill and final drain, to reduce repeated audio underruns.
 
 ## [2.1.0]

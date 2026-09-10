@@ -168,14 +168,14 @@ subscriptions. Reconnection remains explicit via <code>connect()</code>; native 
 </code><button type="button">Copy</button></pre>
 
 <p><code>playSbc()</code> accepts an <code>ArrayBuffer</code> or <code>Uint8Array</code> containing raw SBC frames:
-16 or 32 kHz, joint stereo, SNR allocation, 8 subbands, 16 blocks, bitpool 24 or 48
-(61 or 109 bytes per frame). Sample rate and bitpool must stay constant per file. It copies
+16 or 32 kHz, joint stereo, SNR allocation, 8 subbands, 16 blocks, bitpool 2, 4, 8, 12, 24 or 48
+(17, 21, 29, 37, 61 or 109 bytes per frame). Sample rate and bitpool must stay constant per file. It copies
 the bytes and checks every frame's format and header CRC before sending any
 audio. Empty, incompatible, or truncated input rejects with <code>RangeError</code>.
-The final HID packet is padded with up to three silent SBC frames if needed.
+The final HID packet is padded with silent SBC frames to the selected group size if needed.
 It shares <code>playing</code>, <code>stop()</code>, and playback exclusivity with <code>test()</code>.
 Speaker volume is fixed, so prepare input audio at a low level.</p>
-<p>Playback defaults to an estimated reserve of up to 64 ms on the controller,
+<p>Playback defaults to an estimated reserve of 64 ms (or one packet if larger) on the controller,
 spacing refill packets by at least 4 ms. HID write latency counts toward the
 audio period, and the final mute waits for buffered audio to finish. This absorbs
 short scheduling delays; the estimate cannot measure the controller's actual FIFO.</p>
@@ -193,18 +193,34 @@ comparison with 0/4/16. The value is preserved in audio and competing effect
 reports, then reset to the library's ordinary value 0 when playback ends.
 This can reduce inbound traffic competing with speaker writes; it does not
 guarantee enough output throughput. See the <a href="https://github.com/hbashton/DS4Windows/blob/main/DS4Windows/DS4Control/DualShock4BluetoothAudioProtocol.cs">DS4Windows protocol notes</a>.</p>
+<p>For a native macOS timing comparison, close the browser demo and run
+<code>npm run speaker:native</code> (16 kHz sample) or <code>npm run speaker:native -- --tone</code>
+(the same Test speaker signal). <code>--list</code> enumerates Bluetooth DS4s and <code>--validate</code>
+checks packets without playback. See <a href="media/AUDIO.md#native-macos-comparison">native diagnostic instructions</a>.</p>
 <p>On macOS, Chromium uses a sequenced task runner and blocking <code>IOHIDDeviceSetReport</code>
 calls (<a href="https://chromium.googlesource.com/chromium/src/+/main/services/device/hid/hid_connection_mac.cc">implementation</a>).
 If <code>averageWriteMs</code> exceeds <code>audioPerReportMs</code>, this sequential stream
 cannot sustain playback. Larger send-ahead cannot accumulate a reserve in that
 case; simply removing JavaScript <code>await</code> does not remove the OS-facing queue.</p>
+<p>The demo's <strong>Frames per packet</strong> selector offers 4, 2 and 1 frames for both
+<strong>Test speaker</strong> and <strong>Play sample</strong>, with 4 selected initially. Keep the other
+settings constant when comparing full playback.</p>
 <p>The demo's <strong>Compare packet sizes</strong> sends 24 SBC frames (96/192 ms at 32/16 kHz)
-per case using 1/2/4 frames per report (<code>0x12</code>/<code>0x14</code>/<code>0x17</code>) at either bitpool. It compares host
+per case using 1/2/4 frames per report (<code>0x12</code>/<code>0x14</code>/<code>0x17</code>) at each supported bitpool. It compares host
 write latency against 4/8/16 ms at 32 kHz or 8/16/32 ms at 16 kHz, skips report IDs not exposed
 by the device, and supports Stop. This measures size-dependent transport delays;
 it does not imply that smaller packets improve throughput. The same packet choice
-is available as <code>framesPerReport: 1 | 2 | 4</code> in playback options (default 4).</p>
-<p>The demo's <strong>Play sample</strong> button defaults to <code>demo/both-16k-low.sbc</code>: 16 kHz,
+is available as <code>framesPerReport: 1 | 2 | 4 | 8 | 16 | 24</code> in playback options (default 4).</p>
+<p>The demo's <strong>Play sample</strong> button defaults to <code>demo/both-16k-bp4.sbc</code>
+(16 kHz, bitpool 4, 21 kbit/s, 13,944 bytes). The selector also offers
+<code>demo/both-16k-bp2.sbc</code> (bitpool 2, 17 kbit/s, 11,288 bytes). Both last 5.312 seconds.</p>
+<p>The previous option remains selectable as <code>demo/both-16k-bp12.sbc</code>: 16 kHz,
+bitpool 12, 37 kbit/s, 24,568 bytes, 5.312 seconds. Bitpool 8 is selectable as
+<code>demo/both-16k-bp8.sbc</code> (29 kbit/s, 19,256 bytes). These are experimental
+compression options; physical DS4 acceptance is not yet verified. Both keep
+the existing HID report sizes and frame counts, so smaller SBC frames alone
+do not reduce wire traffic. Test speaker keeps its original reference tone.</p>
+<p>The selector also retains <code>demo/both-16k-low.sbc</code>: 16 kHz,
 bitpool 24, 61 kbit/s, 40,504 bytes, 5.312 seconds. Its 664 frames are sent in 166
 four-frame reports, each containing 32 ms of audio. This experimental format needs
 hardware validation. The sample selector retains <code>demo/both.sbc</code> (bitpool 48,
@@ -357,6 +373,29 @@ Use <code>npm run lint:fix</code> to apply automatic fixes.</li>
 <p>Originally created by <a href="https://github.com/TheBITLINK">TheBITLINK</a> as
 <a href="https://github.com/TheBITLINK/WebHID-DS4"><code>webhid-ds4</code></a>. This fork is
 maintained by <a href="https://github.com/hcodes">hcodes</a>.</p>
+<h3 id="dense-audio-packing-hardware-result" class="tsd-anchor-link">Dense audio packing: hardware result<a href="#dense-audio-packing-hardware-result" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>Packing more than four SBC frames into report 0x17 produced <strong>silence on the
+user's tested DS4</strong>. The browser demo has returned to four frames per packet;
+the dense-packing selector and comparison button have been removed. Bitpool
+2/4/8/12 produced sound with four frames, but playback remained choppy.</p>
+<p>The 8/16/24-frame library and native modes remain explicit diagnostic experiments,
+not supported playback modes. Passing byte-capacity, CRC, or sender-timing tests
+does not establish that the controller decodes these layouts. The result applies
+to the tested header/mode/framing; it does not prove a universal hardware limit.
+The next investigation must address the transport or identify another documented
+packet layout, rather than assume that unused bytes can carry extra frames.</p>
+<h3 id="windows-bluetooth-input-troubleshooting" class="tsd-anchor-link">Windows Bluetooth input troubleshooting<a href="#windows-bluetooth-input-troubleshooting" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>The demo's <strong>Connection diagnostics (input-v12)</strong> panel provides a snapshot of
+incoming report IDs, byte lengths, parsed/rejected counts, and feature <code>0x02</code>
+initialization. Press a controller button, click <strong>Refresh connection diagnostics</strong>,
+and include the snapshot when reporting a connection that opens but has no input.</p>
+<p>Windows HID reports can include collection padding: Chromium reconstructs report
+descriptions using the collection's maximum report length
+(<a href="https://raw.githubusercontent.com/chromium/chromium/main/services/device/hid/hid_service_win.cc">implementation</a>).
+The library trims descriptor-confirmed padding before parsing DS4 Bluetooth input,
+retains extended-report CRC checks, and reads buttons/axes from basic reports while
+extended input is unavailable. This path is covered by simulated reports; physical
+Windows verification is still pending.</p>
 </div></div>
 <div class="col-sidebar">
 <div class="page-menu">
@@ -388,7 +427,11 @@ maintained by <a href="https://github.com/hcodes">hcodes</a>.</p>
 <li><a href="#known-limitations"><span>Known limitations</span></a></li>
 <li><a href="#development"><span>Development</span></a></li>
 <li><a href="#links"><span>Links</span></a></li>
-<li><a href="#credits"><span>Credits</span></a></li></ul></div></details></div>
+<li><a href="#credits"><span>Credits</span></a></li>
+<li>
+<ul>
+<li><a href="#dense-audio-packing-hardware-result"><span>Dense audio packing: hardware result</span></a></li>
+<li><a href="#windows-bluetooth-input-troubleshooting"><span>Windows <wbr/>Bluetooth input troubleshooting</span></a></li></ul></li></ul></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="modules.html">@hcodes/webhid-ds4</a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container">

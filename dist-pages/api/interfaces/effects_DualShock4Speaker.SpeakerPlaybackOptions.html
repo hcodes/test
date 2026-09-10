@@ -11,7 +11,7 @@
 <li><a href="../modules/effects_DualShock4Speaker.html">effects/DualShock4Speaker</a></li>
 <li><a href="" aria-current="page">SpeakerPlaybackOptions</a></li></ul>
 <h1>Interface SpeakerPlaybackOptions</h1></div>
-<div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">SpeakerPlaybackOptions</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#bluetoothpollinterval">bluetoothPollInterval</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#bufferdurationms">bufferDurationMs</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#framesperreport">framesPerReport</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">2</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">1</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">4</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">SpeakerPlaybackOptions</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#bluetoothpollinterval">bluetoothPollInterval</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#bufferdurationms">bufferDurationMs</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#framesperreport">framesPerReport</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">2</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">1</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">4</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">8</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">16</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">24</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
 <li>Defined in effects/DualShock4Speaker.ts:24</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
@@ -39,7 +39,7 @@ Increasing it can reduce inbound traffic competing with audio writes.</p>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="bufferdurationms"><code class="tsd-tag">Optional</code><span>buffer<wbr/>Duration<wbr/>Ms</span><a href="#bufferdurationms" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">bufferDurationMs</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
-<div class="tsd-comment tsd-typography"><p>Estimated controller audio reserve, 16–2048 ms in 16 ms steps. Default 64.
+<div class="tsd-comment tsd-typography"><p>Estimated controller audio reserve, 16–2048 ms in 16 ms steps. Default 64, or one packet if larger.
 Must hold at least one packet (32 ms for four frames at 16 kHz).
 Larger values are experimental: WebHID cannot query the actual FIFO capacity.</p>
 </div><aside class="tsd-sources">
@@ -47,11 +47,12 @@ Larger values are experimental: WebHID cannot query the actual FIFO capacity.</p
 <li>Defined in effects/DualShock4Speaker.ts:29</li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="framesperreport"><code class="tsd-tag">Optional</code><span>frames<wbr/>Per<wbr/>Report</span><a href="#framesperreport" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">framesPerReport</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">2</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">1</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">4</span></div>
-<div class="tsd-comment tsd-typography"><p>SBC frames per HID report: 1 (0x12), 2 (0x14), or 4 (0x17, default).</p>
+<div class="tsd-signature"><span class="tsd-kind-property">framesPerReport</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">2</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">1</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">4</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">8</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">16</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">24</span></div>
+<div class="tsd-comment tsd-typography"><p>SBC frames per HID report: 1 (0x12), 2 (0x14), or 4 (0x17, default).
+8/16/24 use experimental dense 0x17 packing, if the SBC frames fit.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in effects/DualShock4Speaker.ts:35</li></ul></aside></section></section></details></div>
+<li>Defined in effects/DualShock4Speaker.ts:37</li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">

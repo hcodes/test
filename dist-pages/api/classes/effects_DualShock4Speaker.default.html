@@ -15,7 +15,7 @@
 <div class="tsd-comment tsd-typography"><p>Experimental Bluetooth-only playback on the built-in mono speaker.</p>
 </div></section><aside class="tsd-sources">
 <ul>
-<li>Defined in effects/DualShock4Speaker.ts:63</li></ul></aside>
+<li>Defined in effects/DualShock4Speaker.ts:65</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -45,7 +45,7 @@
 </div>
 <h4 class="tsd-returns-title">Returns <a href="../interfaces/effects_DualShock4Speaker.SpeakerPlaybackDiagnostics.html" class="tsd-signature-type tsd-kind-interface">SpeakerPlaybackDiagnostics</a> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">undefined</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in effects/DualShock4Speaker.ts:74</li></ul></aside></div></li></ul></section>
+<li>Defined in effects/DualShock4Speaker.ts:76</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="playing"><span>playing</span><a href="#playing" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -56,7 +56,7 @@
 </div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in effects/DualShock4Speaker.ts:71</li></ul></aside></div></li></ul></section></section></details>
+<li>Defined in effects/DualShock4Speaker.ts:73</li></ul></aside></div></li></ul></section></section></details>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Methods"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
 <h2 class="tsd-anchor-link" id="methods-1">Methods<a href="#methods-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
@@ -67,9 +67,9 @@
 <div class="tsd-signature tsd-anchor-link" id="playsbc-1"><span class="tsd-kind-call-signature">playSbc</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">data</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ArrayBuffer</span> <span class="tsd-signature-symbol">|</span> <span class="tsd-signature-type">Uint8Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ArrayBufferLike</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">?:</span> <a href="../interfaces/effects_DualShock4Speaker.SpeakerPlaybackOptions.html" class="tsd-signature-type tsd-kind-interface">SpeakerPlaybackOptions</a><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><a href="#playsbc-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Plays raw SBC data: 16 or 32 kHz joint stereo, SNR allocation, 8 subbands,
-16 blocks and bitpool 24 or 48 (61/109 bytes/frame). Data is copied and validated
+16 blocks and bitpool 2, 4, 8, 12, 24 or 48 (17/21/29/37/61/109 bytes/frame). Data is copied and validated
 before playback; invalid or truncated files reject with RangeError.
-Up to three silent frames pad the last HID packet. Shares test()/stop()
+Silent frames pad the last HID packet. Shares test()/stop()
 lifecycle and exclusivity. Volume is fixed; prepare audio at a low level.</p>
 </div>
 <div class="tsd-parameters">
@@ -79,7 +79,7 @@ lifecycle and exclusivity. Volume is fixed; prepare audio at a low level.</p>
 <li><span><span class="tsd-kind-parameter">options</span>: <a href="../interfaces/effects_DualShock4Speaker.SpeakerPlaybackOptions.html" class="tsd-signature-type tsd-kind-interface">SpeakerPlaybackOptions</a><span class="tsd-signature-symbol"> = {}</span></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in effects/DualShock4Speaker.ts:104</li></ul></aside></div></li></ul></section>
+<li>Defined in effects/DualShock4Speaker.ts:106</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="stop"><span>stop</span><a href="#stop" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -90,7 +90,7 @@ lifecycle and exclusivity. Volume is fixed; prepare audio at a low level.</p>
 </div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in effects/DualShock4Speaker.ts:132</li></ul></aside></div></li></ul></section>
+<li>Defined in effects/DualShock4Speaker.ts:134</li></ul></aside></div></li></ul></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="test"><span>test</span><a href="#test" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -108,7 +108,7 @@ tests, device loss, or HID write errors. Physical audibility is not verified.</p
 <li><span><span class="tsd-kind-parameter">options</span>: <a href="../interfaces/effects_DualShock4Speaker.SpeakerPlaybackOptions.html" class="tsd-signature-type tsd-kind-interface">SpeakerPlaybackOptions</a><span class="tsd-signature-symbol"> = {}</span></span></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in effects/DualShock4Speaker.ts:93</li></ul></aside></div></li></ul></section></section></details></div>
+<li>Defined in effects/DualShock4Speaker.ts:95</li></ul></aside></div></li></ul></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
